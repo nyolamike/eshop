@@ -1,5 +1,6 @@
 ﻿
 using eshop.Models;
+using PhoneNumbers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,45 +18,31 @@ namespace eshop.Attributes
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            var model = (Register)validationContext.ObjectInstance;
+            if (model == null || String.IsNullOrEmpty(model.PhoneNumber))
+            {
+                return new ValidationResult(ErrorMessage);
+            }
+
+            if (model == null || String.IsNullOrEmpty(model.Country))
+            {
+                return new ValidationResult("Please provide a valid country");
+            }
+
+            
 
             //phone nnumber formating addopted from
             //https://stackoverflow.com/questions/30434836/how-to-convert-mobile-number-to-international-format-in-c-sharp
-            //////Country country = Countries.GetCountry(msg.Country);
-            //////var util = PhoneNumberUtil.GetInstance();
-            //////PhoneNumber pn = util.Parse(msg.PhoneNumber, country.ShortName.ToUpper());
-            //////string internationalPhoneNumber = util.Format(pn, PhoneNumberFormat.INTERNATIONAL).Replace(" ", "");
+            Country country = Countries.GetCountry(model.Country);
+            var util = PhoneNumberUtil.GetInstance();
+            PhoneNumbers.PhoneNumber pn = util.Parse(model.PhoneNumber, country.ShortName.ToUpper());
+            if(util.IsValidNumberForRegion(pn, country.Code.ToLower()))
+            {
+                return ValidationResult.Success;
+            }
+            
 
-            //var from = new Twilio.Types.PhoneNumber(Refs.TwilioPhoneNumber);
-            //var to = new Twilio.Types.PhoneNumber(internationalPhoneNumber);
-            //var message = MessageResource.Create(
-            //    body: "Cheda Account Verification Code " + msg.Code,
-            //    from: from,
-            //    to:  to
-            //);
-
-            //nyd
-            //enable this sinnipet when we are ready to roll out
-            //var results = Refs.NexmoClient.SMS.Send(request: new SMS.SMSRequest
-            //{
-            //    from = "CHEDA PLATFORM",
-            //    to = internationalPhoneNumber,
-            //    text = "Cheda Account Verification Code " + msg.Code
-            //});
-
-            //_log.Info($"MailerActor: InvesterActor => i have finished sending your activation code");
-            //Context.Parent.Tell(new VerificationCodeSent_(msg, msg.ChannelId));
-            //return true;
-
-
-            //Ask the security actor if this phone number exists
-            //Task<bool> question = Refs.SecurityRef.Ask<bool>(new PhoneNumberExists_(value.ToString()));
-            //question.Wait();
-            //if (question.Result==false)
-            //{
-            //    return ValidationResult.Success;
-            //}
-
-            return new ValidationResult(ErrorMessage);
+            return new ValidationResult(ErrorMessage + " For the country " + model.Country);
         }
     }
 }

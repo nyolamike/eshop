@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace eshop.Controllers
 {
     /// <summary>
-    /// Endpoint for processing registration requests
+    /// Endpoint for processing registration requests for new shops
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]

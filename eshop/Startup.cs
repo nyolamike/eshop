@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Akka.Actor;
 using eshop.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,9 @@ namespace eshop
         }
 
         public IConfiguration Configuration { get; }
+        
+
+        public static ActorSystem EshopActorSystem { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -60,10 +64,10 @@ namespace eshop
             services.AddSignalR();
 
 
-            //actor system
-            //var actorSystem = ActorSystem.Create("EshopActorSystem");
-            //actorSystem.ActorOf(BaseActor.Props(), BaseActor.I);
-            //services.AddSingleton(typeof(ActorSystem), (serviceProvider) => actorSystem);
+            //eshop actor system
+            EshopActorSystem = ActorSystem.Create("EshopActorSystem");
+            EshopActorSystem.ActorOf(BaseActor.Props(), BaseActor.I);
+            services.AddSingleton(typeof(ActorSystem), (serviceProvider) => EshopActorSystem);
 
             //should be the last invocation here
             services.AddCors(options =>
